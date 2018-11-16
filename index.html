@@ -62,10 +62,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-test" class="article article-type-post" itemscope="" itemprop="blogPost">
+    <article id="post-记录一些gradle的使用" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div class="article-meta">
-    <a href="/xingguo.io/2018/11/16/test/" class="article-date">
-  <time datetime="2018-11-16T07:10:06.000Z" itemprop="datePublished">2018-11-16</time>
+    <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/" class="article-date">
+  <time datetime="2018-11-05T05:42:52.495Z" itemprop="datePublished">2018-11-05</time>
 </a>
     
   </div>
@@ -76,37 +76,11 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/xingguo.io/2018/11/16/test/">test</a>
+      <a class="article-title" href="/xingguo.io/2018/11/05/记录一些gradle的使用/">记一些gradle命令</a>
     </h1>
   
 
       </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/16/test/" data-id="cjojoq41p0000eq0rivyzue06" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-记录一些gradle的使用" class="article article-type-post" itemscope="" itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/" class="article-date">
-  <time datetime="2018-11-05T05:42:52.495Z" itemprop="datePublished">2018-11-05</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
     
     <div class="article-entry" itemprop="articleBody">
       
@@ -196,7 +170,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/" data-id="cjojoq4200002eq0rj46xju1c" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/" data-id="cjojou1na0001fh0r7c8y3ng8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -215,6 +189,16 @@
   </div>
   <div class="article-inner">
     
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/xingguo.io/2018/11/05/缓存/">一个缓存</a>
+    </h1>
+  
+
+      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
@@ -252,10 +236,11 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">char *getValForKey(char *flag) &#123;</span><br><span class="line">    node *p = head;</span><br><span class="line">    while (NULL != p) &#123;</span><br><span class="line">        if (strcmp(flag, p-&gt;key) == 0) &#123;</span><br><span class="line">            return p-&gt;val;</span><br><span class="line">        &#125;</span><br><span class="line">        p = p-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line">    return NULL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>删除某个值时</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bool deleteNode(char *key) &#123;</span><br><span class="line">    node *p = head;</span><br><span class="line">    node *temp = NULL;</span><br><span class="line">    while (NULL != p) &#123;</span><br><span class="line">        if (strcmp(key, p-&gt;key) == 0) &#123;</span><br><span class="line">            if (temp != NULL) &#123;</span><br><span class="line">                if (p-&gt;next != NULL) &#123;</span><br><span class="line">                    temp-&gt;next = p-&gt;next;</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    temp-&gt;next = NULL;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                head = p-&gt;next;</span><br><span class="line">            &#125;</span><br><span class="line">            free(p);</span><br><span class="line">            return true;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            temp = p;</span><br><span class="line">            p = p-&gt;next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojoq41t0001eq0rkmhue4oo" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojou1mx0000fh0r4lh4wyl3" class="article-share-link">Share</a>
       
       
     </footer>
@@ -319,7 +304,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/" data-id="cjojoq42a0004eq0rvlob9h2k" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/" data-id="cjojou1nk0002fh0rxca1e4ne" class="article-share-link">Share</a>
       
       
     </footer>
@@ -338,6 +323,16 @@
   </div>
   <div class="article-inner">
     
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/xingguo.io/2018/11/05/初探RxJava2/">初探RxJava2</a>
+    </h1>
+  
+
+      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
@@ -386,7 +381,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/初探RxJava2/" data-id="cjojoq4290003eq0rsm58lbwh" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/初探RxJava2/" data-id="cjojou1nl0003fh0ry8bmmguz" class="article-share-link">Share</a>
       
       
     </footer>
@@ -427,15 +422,11 @@
       <ul>
         
           <li>
-            <a href="/xingguo.io/2018/11/16/test/">test</a>
+            <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/">记一些gradle命令</a>
           </li>
         
           <li>
-            <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/xingguo.io/2018/11/05/缓存/">(no title)</a>
+            <a href="/xingguo.io/2018/11/05/缓存/">一个缓存</a>
           </li>
         
           <li>
@@ -443,7 +434,7 @@
           </li>
         
           <li>
-            <a href="/xingguo.io/2018/11/05/初探RxJava2/">(no title)</a>
+            <a href="/xingguo.io/2018/11/05/初探RxJava2/">初探RxJava2</a>
           </li>
         
       </ul>
