@@ -77,18 +77,18 @@
         <p>​    最近在某个库上开发了新功能，项目发版时不需要这部分功能。于是将库回退到当前线上的版本。    </p>
 <p>​        某天，大佬突然说：你这个库没改回去啊，还是有bug的版本，你看我点了这个就闪退。</p>
 <p>​        我：还有这种事？查看当前版本。</p>
-<p><img src="记录一些gradle的使用\0.png" alt="1"></p>
+<p><img src="/xingguo.io/2018/11/05/记录一些gradle的使用/0.png" alt="1"></p>
 <p>​        本地依赖：</p>
-<p><img src="记录一些gradle的使用\1.png" alt="1"></p>
+<p><img src="/xingguo.io/2018/11/05/记录一些gradle的使用/1.png" alt="1"></p>
 <p>what?我本地明明就不是这个版本啊，查了几个moudel依赖也没有加这个1.0.13。可能是缓存问题，老规矩清理缓存吧。    </p>
-<p>​                <img src="记录一些gradle的使用\2.png" alt="2">    </p>
+<p>​                <img src="/xingguo.io/2018/11/05/记录一些gradle的使用/2.png" alt="2">    </p>
 <p>​    于是，在Terminal输入：<code>gradlew clean</code>。N分钟后清理完毕重新构建…</p>
 <p>​    本地还是1.0.13，这就很头疼了，明明没有这个版本啊，哪里来的？？</p>
 <p>​    我：大佬，要不我们清一下android studio的整个缓存吧。</p>
 <p>​    大佬：恩，开始吧。</p>
-<p>​    <img src="记录一些gradle的使用\3.png" alt="3"></p>
+<p>​    <img src="/xingguo.io/2018/11/05/记录一些gradle的使用/3.png" alt="3"></p>
 <p>​    N分钟过去后，本地依然还是1.0.13….</p>
-<p>​    <img src="记录一些gradle的使用\4.JPG" alt="4"></p>
+<p>​    <img src="/xingguo.io/2018/11/05/记录一些gradle的使用/4.JPG" alt="4"></p>
 <p>​    我：大佬，要不我们删除.gradle文件，重新来一次。</p>
 <p>​    大佬：gun…</p>
 <p>​    ok，我又想了一下，要不把版本号升高一点点，看这个版本变不变？</p>
@@ -96,9 +96,9 @@
 <p>​    N分钟之后，这个库的版本总算变了，变成了1.0.17。综上所述，我们可以发现并不是android studio的bug也不是缓存引起的问题。好，开个玩笑。经过上述步骤，我猜可能是别的库引用了这个1.0.13版本，导致当我引用这个1.0.6版本时，studio默认帮我做了升级操作。</p>
 <p>​    这时突然又想起了某大佬教我的另一个gradle命令。</p>
 <p>于是我在Terminal输入：<code>gradlew app:dep</code></p>
-<p><img src="记录一些gradle的使用\5.png" alt="5"></p>
+<p><img src="/xingguo.io/2018/11/05/记录一些gradle的使用/5.png" alt="5"></p>
 <p>​        这个命令能打印出项目的依赖树，能看到所有的依赖，我们找到utils这个库，不出所料，确实是有别的库引用了高版本的utils，导致了utils库升级到了1.0.13。</p>
-<p>​        <img src="记录一些gradle的使用\6.JPG" alt="6"></p>
+<p>​        <img src="/xingguo.io/2018/11/05/记录一些gradle的使用/6.JPG" alt="6"></p>
 <p>问题找到了，那么应该怎么解决呢？摆在眼前的路有两条。</p>
 <ol>
 <li>修改依赖1.0.13的库到1.0.6保持和线上的版本一致，然后重新上传到maven，然后本地再更新一次，这个方法有点麻烦，但是也是最直接的解决方案。</li>
@@ -109,7 +109,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">configurations.all &#123;</span><br><span class="line">    resolutionStrategy.eachDependency &#123; DependencyResolveDetails details -&gt;</span><br><span class="line">        def requested = details.requested</span><br><span class="line">        if (requested.group == &quot;com.lucky&quot; &amp;&amp; requested.name == &quot;utils&quot;) &#123;</span><br><span class="line">            details.useVersion &apos;1.0.6-SNAPSHOT&apos;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这段脚本意思是，强制utils库的版本使用1.0.6-SNAPSHOT。</p>
 <p>重新build后。我们再次查看项目依赖树</p>
-<p><img src="记录一些gradle的使用\7.png" alt="7"></p>
+<p><img src="/xingguo.io/2018/11/05/记录一些gradle的使用/7.png" alt="7"></p>
 <p>utils库已经被强制回到了1.0.6-SNAPSHOT。</p>
 <p>不得不说这段脚本确实是最佳的解决方案，但是这个方法的缺点就是，想要升级utils库时，一定要记得删除这段脚本，不然会导致本地一直都是1.0.6-SNAPSHOT。。。</p>
 <h1 id="Gradle命令："><a href="#Gradle命令：" class="headerlink" title="Gradle命令："></a>Gradle命令：</h1><p>ok，那么上文中所说的gradlew到底是什么呢？gradlew 即gradle wrapper，意思是gradle的一层包装。可以理解成对gradle的封装。你可以在你的项目中找到它，在根目录下有个/gradle/wrapper文件夹，里面有wrapper的jar包和版本号等信息。</p>
@@ -160,7 +160,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/" data-id="cjojgep2s0000y90rint60het" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/" data-id="cjojgsae200011v0r2xgzp1aa" class="article-share-link">Share</a>
       
       
     </footer>
@@ -184,8 +184,8 @@
       
         <p>​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。 </p>
 <p>​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。 </p>
-<p><img src="缓存\1.png" alt="1">    ![1](C:\Users\Administrator\Desktop\1.png</p>
-<p><img src="缓存\2.png" alt=""></p>
+<p><img src="/xingguo.io/2018/11/05/缓存/1.png" alt="1">    ![1](C:\Users\Administrator\Desktop\1.png</p>
+<p><img src="/xingguo.io/2018/11/05/缓存/2.png" alt=""></p>
 <p>​    可以看出来，数组的内存是连续性的。而链表的内存地址是不连续的，它可以利用内存碎片进行存储。正是基于这一点，数组和链表有几个特性。</p>
 <p><strong>1，插入</strong></p>
 <p>数组：在向数组中插入某个值的时候，如果在数组中间插入一个值，这个索引后面的数据都会向后移动一位。</p>
@@ -219,7 +219,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojgep2v0001y90rpk0kcr7h" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojgsady00001v0r2mohhiai" class="article-share-link">Share</a>
       
       
     </footer>
@@ -244,20 +244,20 @@
         <h4 id="请求系统权限？一个注解就够了。"><a href="#请求系统权限？一个注解就够了。" class="headerlink" title="请求系统权限？一个注解就够了。"></a>请求系统权限？一个注解就够了。</h4><p>   在Android 6.0（API  level 23）之后，并且编译时targetSdkVersion大于等于23时。用户是在应用运行时才去授予权限给应用，而不是在用户安装app的时候。所以，如果没有权限，运行到敏感代码时便会抛出异常。好在现在封装了不少开源库去帮助我们请求权限，比如说著名的RxPermissions。</p>
 <p>  好了，废话不多说。为了尽量简化开发时的工作。（我决定删库跑路，sorry ~ 跑题了，不小心说出了心里话。）我想用一个注解来请求权限，并且当用户拒绝之后，不在执行被注解修饰的函数。</p>
 <p>​    设计思路如下：</p>
-<p><img src="实现权限请求？一个注解就够了\111.png" alt="1"></p>
+<p><img src="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/111.png" alt="1"></p>
 <p>在实现我的“伟业”前，需要自定义一个注解，用来作为AOP的切入点。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Target(ElementType.METHOD)</span><br><span class="line">public @interface Permission &#123;</span><br><span class="line">    String[] value();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>非常简单，该注解由元注解修饰，表示其存在于运行时，并且只能用于修饰方法（函数）。该注解需要传入一个String数组，该数组就是调用者需要声明的权限名称。</p>
 <p>ok，在定义完注解之后，很明显需要一个地方来使用这个注解。这里需要引入另一个AOP库aspectjx。通过自定义注解@Permission来作为AOP的连接点，并且通过aspectjx的@Around注解来达到获得权限执行原方法，被拒绝了权限就跳过原方法。代码如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@Aspect</span><br><span class="line">public class SysPermissionAspect &#123;</span><br><span class="line"></span><br><span class="line">    @Around(&quot;execution(@com.luck.permission.annotation.Permission * *(..)) &amp;&amp; @annotation(permission)&quot;)</span><br><span class="line">    public void clickAspectj(final ProceedingJoinPoint joinPoint, final Permission permission) &#123;</span><br><span class="line">       		if(isGranted)&#123;</span><br><span class="line">                joinPoint.proceed();//获得权限，执行原方法</span><br><span class="line">       		&#125;else&#123;</span><br><span class="line">       			//拒绝权限后，跳过原方法</span><br><span class="line">                Log.d(&quot;SysPermissionAspect&quot;, &quot;拒绝了权限：&quot; + permission.value());</span><br><span class="line">       		&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>​    这时你可能会很疑惑，老子这么xx写的代码，凭什么你AOP之后说执行就执行，说跳过不执行就不执行啊？？？</p>
-<p><img src="实现权限请求？一个注解就够了\222.jpg" alt="2"></p>
+<p><img src="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/222.jpg" alt="2"></p>
 <p>​     骚年别着急，放下手中愤怒的西瓜刀。其实最初我也很疑惑，最初接触到AOP还是在公司项目无痕埋点的时候。。。</p>
 <p>为了解决这个疑惑，我们不妨反编译一下编译生成的代码。看一眼AOP到底做了什么操作？同样是九年义务教育凭什么AOP就能这么秀？?</p>
 <p>项目源码中的代码</p>
-<p><img src="实现权限请求？一个注解就够了\444.png" alt=""></p>
+<p><img src="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/444.png" alt=""></p>
 <p>编译完成后，反编译查看到的代码</p>
-<p><img src="实现权限请求？一个注解就够了\333.png" alt=""></p>
+<p><img src="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/333.png" alt=""></p>
 <p> 不难发现，编译完后的代码，被织入了大量的代码，原有的函数已经发生了变化。。。</p>
 <p>   ok，接下来的问题就是如何去请求权限，因为请求权限的回调函数</p>
 <p>onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)</p>
@@ -273,7 +273,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/" data-id="cjojgep390003y90rt93s2a7a" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/" data-id="cjojgsaei00031v0rfgpfznqo" class="article-share-link">Share</a>
       
       
     </footer>
@@ -340,7 +340,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/初探RxJava2/" data-id="cjojgep370002y90r02boios5" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/初探RxJava2/" data-id="cjojgsaeh00021v0ro6zowi3k" class="article-share-link">Share</a>
       
       
     </footer>

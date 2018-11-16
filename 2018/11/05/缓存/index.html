@@ -14,13 +14,13 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。  ​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。      ![1](C:\Users\Administr">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/缓存/1.png">
-<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/缓存/2.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/1.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/2.png">
 <meta property="og:updated_time" content="2018-09-28T03:37:57.856Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo">
 <meta name="twitter:description" content="​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。  ​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。      ![1](C:\Users\Administr">
-<meta name="twitter:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/缓存/1.png">
+<meta name="twitter:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/1.png">
   
     <link rel="alternate" href="/xingguo.io/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -81,8 +81,8 @@
       
         <p>​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。 </p>
 <p>​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。 </p>
-<p><img src="缓存\1.png" alt="1">    ![1](C:\Users\Administrator\Desktop\1.png</p>
-<p><img src="缓存\2.png" alt=""></p>
+<p><img src="/xingguo.io/2018/11/05/缓存/1.png" alt="1">    ![1](C:\Users\Administrator\Desktop\1.png</p>
+<p><img src="/xingguo.io/2018/11/05/缓存/2.png" alt=""></p>
 <p>​    可以看出来，数组的内存是连续性的。而链表的内存地址是不连续的，它可以利用内存碎片进行存储。正是基于这一点，数组和链表有几个特性。</p>
 <p><strong>1，插入</strong></p>
 <p>数组：在向数组中插入某个值的时候，如果在数组中间插入一个值，这个索引后面的数据都会向后移动一位。</p>
@@ -116,7 +116,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojgep2v0001y90rpk0kcr7h" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojgsady00001v0r2mohhiai" class="article-share-link">Share</a>
       
       
     </footer>
