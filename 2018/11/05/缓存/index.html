@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。  ​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。      ![1](C:\Users\Administr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。  ​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。      ![1](C:\Users\Administr">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/1.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/2.png">
+<meta property="og:updated_time" content="2018-09-28T03:37:57.856Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+<meta name="twitter:description" content="​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。  ​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。      ![1](C:\Users\Administr">
+<meta name="twitter:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/1.png">
+  
+    <link rel="alternate" href="/xingguo.io/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/xingguo.io/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/xingguo.io/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/xingguo.io/">Home</a>
+        
+          <a class="main-nav-link" href="/xingguo.io/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/xingguo.io/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qq605088820.github.io/xingguo.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-缓存" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/xingguo.io/2018/11/05/缓存/" class="article-date">
+  <time datetime="2018-11-05T05:42:52.479Z" itemprop="datePublished">2018-11-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。 </p>
+<p>​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。 </p>
+<p><img src="/xingguo.io/2018/11/05/缓存/1.png" alt="1">    ![1](C:\Users\Administrator\Desktop\1.png</p>
+<p><img src="/xingguo.io/2018/11/05/缓存/2.png" alt=""></p>
+<p>​    可以看出来，数组的内存是连续性的。而链表的内存地址是不连续的，它可以利用内存碎片进行存储。正是基于这一点，数组和链表有几个特性。</p>
+<p><strong>1，插入</strong></p>
+<p>数组：在向数组中插入某个值的时候，如果在数组中间插入一个值，这个索引后面的数据都会向后移动一位。</p>
+<p>链表：在向链表中插入值时，只需要将链断开，重新接上就可以了。</p>
+<p>所以在插入数据时，链表比数组高效。</p>
+<p><strong>2，删除</strong></p>
+<p>数组：如果想删除数组某个索引的值，同样会移动数组该索引后面的值。</p>
+<p>链表：在删除链表中的某个值时，断开链指向下一个节点即可。</p>
+<p>所以删除值时，链表也比数组高效。</p>
+<p><strong>3，修改</strong></p>
+<p>数组：由于数组的内存是连续的，想修改某个值时，可以根据下标快速定位到。</p>
+<p>链表：链表在修改时，需要遍历链表中的节点，找到对应节点才能修改。</p>
+<p>修改时，数组比链表高效。</p>
+<p><strong>4，查找</strong></p>
+<p>数组：数组可以根据下标快速定位，需要查找的值</p>
+<p>链表：链表需要遍历节点，找到需要的值</p>
+<p>查找时，数组比链表快。</p>
+<p>综合上面的特性，我想动态添加缓存，最终选择了链表来存储。</p>
+<p>ok，那么我们来实现链表吧。</p>
+<p>首先定义结构体，因为存储的key-value形式。所以结构体定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct node &#123;</span><br><span class="line">    char *key;</span><br><span class="line">    char *val;</span><br><span class="line">    struct node *next;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>我们定义了两个char<em> 一个用来存储key，一个用来存储value。然后定义了一个node</em>，用来指向下一个结构体的地址。</p>
+<p>然后，定义一个表头指向第一个节点的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node *head = NULL;</span><br></pre></td></tr></table></figure>
+<p>插入数据时：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">void insertNode(char *key, char *val) &#123;</span><br><span class="line">    node *p = head;//定义指针指向表头</span><br><span class="line">    node *data = (node *) malloc(sizeof(node));//申请内存空间</span><br><span class="line">    data-&gt;key = key;//存入key</span><br><span class="line">    data-&gt;val = val;//存入value</span><br><span class="line">    head = data;//表头指向插入的数据</span><br><span class="line">    data-&gt;next = p;//新数据存储原有表头所指向的地址</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查询某个值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">char *getValForKey(char *flag) &#123;</span><br><span class="line">    node *p = head;</span><br><span class="line">    while (NULL != p) &#123;</span><br><span class="line">        if (strcmp(flag, p-&gt;key) == 0) &#123;</span><br><span class="line">            return p-&gt;val;</span><br><span class="line">        &#125;</span><br><span class="line">        p = p-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line">    return NULL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>删除某个值时</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bool deleteNode(char *key) &#123;</span><br><span class="line">    node *p = head;</span><br><span class="line">    node *temp = NULL;</span><br><span class="line">    while (NULL != p) &#123;</span><br><span class="line">        if (strcmp(key, p-&gt;key) == 0) &#123;</span><br><span class="line">            if (temp != NULL) &#123;</span><br><span class="line">                if (p-&gt;next != NULL) &#123;</span><br><span class="line">                    temp-&gt;next = p-&gt;next;</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    temp-&gt;next = NULL;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                head = p-&gt;next;</span><br><span class="line">            &#125;</span><br><span class="line">            free(p);</span><br><span class="line">            return true;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            temp = p;</span><br><span class="line">            p = p-&gt;next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojgsady00001v0r2mohhiai" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/xingguo.io/archives/2018/11/">November 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/缓存/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/初探RxJava2/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Hexo<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/xingguo.io/" class="mobile-nav-link">Home</a>
+  
+    <a href="/xingguo.io/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/xingguo.io/fancybox/jquery.fancybox.css">
+  <script src="/xingguo.io/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/xingguo.io/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
