@@ -62,33 +62,105 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-你好" class="article article-type-post" itemscope="" itemprop="blogPost">
+    <article id="post-记录一些gradle的使用" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div class="article-meta">
-    <a href="/xingguo.io/2018/11/16/你好/" class="article-date">
-  <time datetime="2018-11-16T03:02:27.000Z" itemprop="datePublished">2018-11-16</time>
+    <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/" class="article-date">
+  <time datetime="2018-11-05T05:42:52.495Z" itemprop="datePublished">2018-11-05</time>
 </a>
     
   </div>
   <div class="article-inner">
     
     
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/xingguo.io/2018/11/16/你好/">你好</a>
-    </h1>
-  
-
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>​    最近在某个库上开发了新功能，项目发版时不需要这部分功能。于是将库回退到当前线上的版本。    </p>
+<p>​        某天，大佬突然说：你这个库没改回去啊，还是有bug的版本，你看我点了这个就闪退。</p>
+<p>​        我：还有这种事？查看当前版本。</p>
+<p><img src="记录一些gradle的使用\0.png" alt="1"></p>
+<p>​        本地依赖：</p>
+<p><img src="记录一些gradle的使用\1.png" alt="1"></p>
+<p>what?我本地明明就不是这个版本啊，查了几个moudel依赖也没有加这个1.0.13。可能是缓存问题，老规矩清理缓存吧。    </p>
+<p>​                <img src="记录一些gradle的使用\2.png" alt="2">    </p>
+<p>​    于是，在Terminal输入：<code>gradlew clean</code>。N分钟后清理完毕重新构建…</p>
+<p>​    本地还是1.0.13，这就很头疼了，明明没有这个版本啊，哪里来的？？</p>
+<p>​    我：大佬，要不我们清一下android studio的整个缓存吧。</p>
+<p>​    大佬：恩，开始吧。</p>
+<p>​    <img src="记录一些gradle的使用\3.png" alt="3"></p>
+<p>​    N分钟过去后，本地依然还是1.0.13….</p>
+<p>​    <img src="记录一些gradle的使用\4.JPG" alt="4"></p>
+<p>​    我：大佬，要不我们删除.gradle文件，重新来一次。</p>
+<p>​    大佬：gun…</p>
+<p>​    ok，我又想了一下，要不把版本号升高一点点，看这个版本变不变？</p>
+<p>​    说干就干，我和大佬把这个库升级到了1.0.17。</p>
+<p>​    N分钟之后，这个库的版本总算变了，变成了1.0.17。综上所述，我们可以发现并不是android studio的bug也不是缓存引起的问题。好，开个玩笑。经过上述步骤，我猜可能是别的库引用了这个1.0.13版本，导致当我引用这个1.0.6版本时，studio默认帮我做了升级操作。</p>
+<p>​    这时突然又想起了某大佬教我的另一个gradle命令。</p>
+<p>于是我在Terminal输入：<code>gradlew app:dep</code></p>
+<p><img src="记录一些gradle的使用\5.png" alt="5"></p>
+<p>​        这个命令能打印出项目的依赖树，能看到所有的依赖，我们找到utils这个库，不出所料，确实是有别的库引用了高版本的utils，导致了utils库升级到了1.0.13。</p>
+<p>​        <img src="记录一些gradle的使用\6.JPG" alt="6"></p>
+<p>问题找到了，那么应该怎么解决呢？摆在眼前的路有两条。</p>
+<ol>
+<li>修改依赖1.0.13的库到1.0.6保持和线上的版本一致，然后重新上传到maven，然后本地再更新一次，这个方法有点麻烦，但是也是最直接的解决方案。</li>
+<li>utils库修复闪退的bug，然后重传到maven，本地更新依赖。这个办法风险很大，因为utils这个库已经加了很多代码了，还要重新拉分支，屏蔽新加的这部分代码。</li>
+</ol>
+<p>思考良久，问了一下另一个大佬这个问题怎么解决比较好，大佬思索了一下，给出了解决方案。</p>
+<p>在app.gradle中加入了以下脚本。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">configurations.all &#123;</span><br><span class="line">    resolutionStrategy.eachDependency &#123; DependencyResolveDetails details -&gt;</span><br><span class="line">        def requested = details.requested</span><br><span class="line">        if (requested.group == &quot;com.lucky&quot; &amp;&amp; requested.name == &quot;utils&quot;) &#123;</span><br><span class="line">            details.useVersion &apos;1.0.6-SNAPSHOT&apos;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段脚本意思是，强制utils库的版本使用1.0.6-SNAPSHOT。</p>
+<p>重新build后。我们再次查看项目依赖树</p>
+<p><img src="记录一些gradle的使用\7.png" alt="7"></p>
+<p>utils库已经被强制回到了1.0.6-SNAPSHOT。</p>
+<p>不得不说这段脚本确实是最佳的解决方案，但是这个方法的缺点就是，想要升级utils库时，一定要记得删除这段脚本，不然会导致本地一直都是1.0.6-SNAPSHOT。。。</p>
+<h1 id="Gradle命令："><a href="#Gradle命令：" class="headerlink" title="Gradle命令："></a>Gradle命令：</h1><p>ok，那么上文中所说的gradlew到底是什么呢？gradlew 即gradle wrapper，意思是gradle的一层包装。可以理解成对gradle的封装。你可以在你的项目中找到它，在根目录下有个/gradle/wrapper文件夹，里面有wrapper的jar包和版本号等信息。</p>
+<p><strong>常用的gradle命令</strong></p>
+<ul>
+<li><p>gradlew -v 可以查看当前gradle的版本号</p>
+</li>
+<li><p>gradlew clean 删除app目录下所有bulid文件夹</p>
+</li>
+<li><p>gradlew build 打包apk，你可以在app/build/outputs/apk下找到输出的包</p>
+</li>
+<li><p>gradlew tasks 列出所有的task</p>
+</li>
+<li><p>build 命令会打出所有buildTypes包，如果你想打包某个buildTypes。你可以使用assemble+buildTypes形式。</p>
+<p>比如：gradlew assembleDebug   gradlew assembleRelease等。</p>
+<p>此命令更厉害的地方在于还能打渠道包，我们以wandoujia渠道为例。你可以使用assemble+Product Flavor+buildTypes</p>
+<p>比如：gradlew assembleWandoujiaRelease。直接就能输出豌豆荚渠道下的realease包。</p>
+</li>
+<li><p>graldew installRelease 打包并安装release包</p>
+</li>
+<li><p>gradlew uninstallRelease 卸载Release包</p>
+</li>
+<li><p>gradlew app:dep  查看项目依赖树</p>
+</li>
+</ul>
+<h2 id="排除传递依赖"><a href="#排除传递依赖" class="headerlink" title="排除传递依赖"></a>排除传递依赖</h2><ul>
+<li><p>exclude：排除指定模块的依赖。参数分别是<code>group</code>和<code>module</code>，会排除所有匹配项</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">androidTestCompile(&apos;com.android.support.test.espresso:espresso-core:2.2.2&apos;, &#123;</span><br><span class="line">	//排除兼容包下annotations模块</span><br><span class="line">    exclude group: &apos;com.android.support&apos;, module: &apos;support-annotations&apos;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>transitive：默认为true，gradle自动添加子依赖项。设置为false排除所有的传递依赖，可以用来解决一些依赖冲突的问题。</p>
+</li>
+<li><p>force：强制设置某个模块的版本。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//解决上面版本冲突问题，此方法也可行。</span><br><span class="line">configurations.all&#123;</span><br><span class="line">    resolutionStrategy&#123;</span><br><span class="line">        force&apos;com.xxx:xxx:1.0.6-SNAPSHOT&apos;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>构建类型</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">buildTypes &#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>   比如，你有多个环境，debug环境，预生产环境，生产环境。这时候你有多个URL服务器地址，一般你在打包时，需要在代码里改几行代码，以实现访问不同的环境。用脚本你可以这样实现。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">buildTypes &#123;</span><br><span class="line">    debug &#123;</span><br><span class="line">        ...</span><br><span class="line">        buildConfigField &quot;String&quot;, &quot;BASE_URL&quot;, &quot;测试地址&quot;</span><br><span class="line">    &#125;</span><br><span class="line">    pre &#123;</span><br><span class="line">    	...</span><br><span class="line">        buildConfigField &quot;String&quot;, &quot;BASE_URL&quot;, &quot;预生产地址&quot;</span><br><span class="line">    &#125;</span><br><span class="line">    release &#123;</span><br><span class="line">       ...</span><br><span class="line">       buildConfigField &quot;String&quot;,&quot;BASE_URL&quot;, &quot;生产地址&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>引用时，你可以在项目中使用BuildConfig.BASE_URL 不同环境传递的参数也是不一样的。</p>
+<p><strong>多渠道打包</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">productFlavors&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>网上多是类似友盟的配置，copy过来</p>
+<p>在<code>AndroidManifest.xml</code>里面写上：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta-data </span><br><span class="line">android:name=&quot;UMENG_CHANNEL&quot;</span><br><span class="line"></span><br><span class="line">android:value=&quot;Channel_ID&quot; /&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">productFlavors &#123;</span><br><span class="line">    xiaomi &#123;</span><br><span class="line">        manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;xiaomi&quot;]</span><br><span class="line">    &#125;</span><br><span class="line">    wandoujia &#123;</span><br><span class="line">        manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;wandoujia&quot;]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/16/你好/" data-id="cjojfwluy0001v80rjoecdrw4" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/" data-id="cjojgep2s0000y90rint60het" class="article-share-link">Share</a>
       
       
     </footer>
@@ -98,42 +170,177 @@
 
 
   
-    <article id="post-hello-world" class="article article-type-post" itemscope="" itemprop="blogPost">
+    <article id="post-缓存" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div class="article-meta">
-    <a href="/xingguo.io/2018/11/16/hello-world/" class="article-date">
-  <time datetime="2018-11-16T02:57:26.311Z" itemprop="datePublished">2018-11-16</time>
+    <a href="/xingguo.io/2018/11/05/缓存/" class="article-date">
+  <time datetime="2018-11-05T05:42:52.479Z" itemprop="datePublished">2018-11-05</time>
 </a>
     
   </div>
   <div class="article-inner">
     
     
-      <header class="article-header">
-        
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>​    在项目中遇到一个缓存问题。需要将对应的key-value进行缓存，先从内存中查找对应的值，如果没有再从指定路径的文件中获取。 </p>
+<p>​    这个貌似很简单，不就是一个二级缓存嘛。但是当时是在JNI环境下，使用的是c语言。权衡之下决定自己写一个缓存的类。那么问题来了，用什么方法去存储到内存呢？数组或者链表？于是对数组和链表进行了对比。 </p>
+<p><img src="缓存\1.png" alt="1">    ![1](C:\Users\Administrator\Desktop\1.png</p>
+<p><img src="缓存\2.png" alt=""></p>
+<p>​    可以看出来，数组的内存是连续性的。而链表的内存地址是不连续的，它可以利用内存碎片进行存储。正是基于这一点，数组和链表有几个特性。</p>
+<p><strong>1，插入</strong></p>
+<p>数组：在向数组中插入某个值的时候，如果在数组中间插入一个值，这个索引后面的数据都会向后移动一位。</p>
+<p>链表：在向链表中插入值时，只需要将链断开，重新接上就可以了。</p>
+<p>所以在插入数据时，链表比数组高效。</p>
+<p><strong>2，删除</strong></p>
+<p>数组：如果想删除数组某个索引的值，同样会移动数组该索引后面的值。</p>
+<p>链表：在删除链表中的某个值时，断开链指向下一个节点即可。</p>
+<p>所以删除值时，链表也比数组高效。</p>
+<p><strong>3，修改</strong></p>
+<p>数组：由于数组的内存是连续的，想修改某个值时，可以根据下标快速定位到。</p>
+<p>链表：链表在修改时，需要遍历链表中的节点，找到对应节点才能修改。</p>
+<p>修改时，数组比链表高效。</p>
+<p><strong>4，查找</strong></p>
+<p>数组：数组可以根据下标快速定位，需要查找的值</p>
+<p>链表：链表需要遍历节点，找到需要的值</p>
+<p>查找时，数组比链表快。</p>
+<p>综合上面的特性，我想动态添加缓存，最终选择了链表来存储。</p>
+<p>ok，那么我们来实现链表吧。</p>
+<p>首先定义结构体，因为存储的key-value形式。所以结构体定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct node &#123;</span><br><span class="line">    char *key;</span><br><span class="line">    char *val;</span><br><span class="line">    struct node *next;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>我们定义了两个char<em> 一个用来存储key，一个用来存储value。然后定义了一个node</em>，用来指向下一个结构体的地址。</p>
+<p>然后，定义一个表头指向第一个节点的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node *head = NULL;</span><br></pre></td></tr></table></figure>
+<p>插入数据时：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">void insertNode(char *key, char *val) &#123;</span><br><span class="line">    node *p = head;//定义指针指向表头</span><br><span class="line">    node *data = (node *) malloc(sizeof(node));//申请内存空间</span><br><span class="line">    data-&gt;key = key;//存入key</span><br><span class="line">    data-&gt;val = val;//存入value</span><br><span class="line">    head = data;//表头指向插入的数据</span><br><span class="line">    data-&gt;next = p;//新数据存储原有表头所指向的地址</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查询某个值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">char *getValForKey(char *flag) &#123;</span><br><span class="line">    node *p = head;</span><br><span class="line">    while (NULL != p) &#123;</span><br><span class="line">        if (strcmp(flag, p-&gt;key) == 0) &#123;</span><br><span class="line">            return p-&gt;val;</span><br><span class="line">        &#125;</span><br><span class="line">        p = p-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line">    return NULL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>删除某个值时</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bool deleteNode(char *key) &#123;</span><br><span class="line">    node *p = head;</span><br><span class="line">    node *temp = NULL;</span><br><span class="line">    while (NULL != p) &#123;</span><br><span class="line">        if (strcmp(key, p-&gt;key) == 0) &#123;</span><br><span class="line">            if (temp != NULL) &#123;</span><br><span class="line">                if (p-&gt;next != NULL) &#123;</span><br><span class="line">                    temp-&gt;next = p-&gt;next;</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    temp-&gt;next = NULL;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                head = p-&gt;next;</span><br><span class="line">            &#125;</span><br><span class="line">            free(p);</span><br><span class="line">            return true;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            temp = p;</span><br><span class="line">            p = p-&gt;next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/缓存/" data-id="cjojgep2v0001y90rpk0kcr7h" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/xingguo.io/2018/11/16/hello-world/">Hello World</a>
-    </h1>
-  
+</article>
 
-      </header>
+
+  
+    <article id="post-实现权限请求？一个注解就够了" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/" class="article-date">
+  <time datetime="2018-11-05T05:42:52.462Z" itemprop="datePublished">2018-11-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <h4 id="请求系统权限？一个注解就够了。"><a href="#请求系统权限？一个注解就够了。" class="headerlink" title="请求系统权限？一个注解就够了。"></a>请求系统权限？一个注解就够了。</h4><p>   在Android 6.0（API  level 23）之后，并且编译时targetSdkVersion大于等于23时。用户是在应用运行时才去授予权限给应用，而不是在用户安装app的时候。所以，如果没有权限，运行到敏感代码时便会抛出异常。好在现在封装了不少开源库去帮助我们请求权限，比如说著名的RxPermissions。</p>
+<p>  好了，废话不多说。为了尽量简化开发时的工作。（我决定删库跑路，sorry ~ 跑题了，不小心说出了心里话。）我想用一个注解来请求权限，并且当用户拒绝之后，不在执行被注解修饰的函数。</p>
+<p>​    设计思路如下：</p>
+<p><img src="实现权限请求？一个注解就够了\111.png" alt="1"></p>
+<p>在实现我的“伟业”前，需要自定义一个注解，用来作为AOP的切入点。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Target(ElementType.METHOD)</span><br><span class="line">public @interface Permission &#123;</span><br><span class="line">    String[] value();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>非常简单，该注解由元注解修饰，表示其存在于运行时，并且只能用于修饰方法（函数）。该注解需要传入一个String数组，该数组就是调用者需要声明的权限名称。</p>
+<p>ok，在定义完注解之后，很明显需要一个地方来使用这个注解。这里需要引入另一个AOP库aspectjx。通过自定义注解@Permission来作为AOP的连接点，并且通过aspectjx的@Around注解来达到获得权限执行原方法，被拒绝了权限就跳过原方法。代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@Aspect</span><br><span class="line">public class SysPermissionAspect &#123;</span><br><span class="line"></span><br><span class="line">    @Around(&quot;execution(@com.luck.permission.annotation.Permission * *(..)) &amp;&amp; @annotation(permission)&quot;)</span><br><span class="line">    public void clickAspectj(final ProceedingJoinPoint joinPoint, final Permission permission) &#123;</span><br><span class="line">       		if(isGranted)&#123;</span><br><span class="line">                joinPoint.proceed();//获得权限，执行原方法</span><br><span class="line">       		&#125;else&#123;</span><br><span class="line">       			//拒绝权限后，跳过原方法</span><br><span class="line">                Log.d(&quot;SysPermissionAspect&quot;, &quot;拒绝了权限：&quot; + permission.value());</span><br><span class="line">       		&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    这时你可能会很疑惑，老子这么xx写的代码，凭什么你AOP之后说执行就执行，说跳过不执行就不执行啊？？？</p>
+<p><img src="实现权限请求？一个注解就够了\222.jpg" alt="2"></p>
+<p>​     骚年别着急，放下手中愤怒的西瓜刀。其实最初我也很疑惑，最初接触到AOP还是在公司项目无痕埋点的时候。。。</p>
+<p>为了解决这个疑惑，我们不妨反编译一下编译生成的代码。看一眼AOP到底做了什么操作？同样是九年义务教育凭什么AOP就能这么秀？?</p>
+<p>项目源码中的代码</p>
+<p><img src="实现权限请求？一个注解就够了\444.png" alt=""></p>
+<p>编译完成后，反编译查看到的代码</p>
+<p><img src="实现权限请求？一个注解就够了\333.png" alt=""></p>
+<p> 不难发现，编译完后的代码，被织入了大量的代码，原有的函数已经发生了变化。。。</p>
+<p>   ok，接下来的问题就是如何去请求权限，因为请求权限的回调函数</p>
+<p>onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)</p>
+<p>该方法只存在于Activity和Fragment中。所以，当我们只能拿到当前运行的Activity的时候，如何能获取到请求权限后的回调？就像鼎鼎大名的图片加载库Gilde，是如何通过只拿到Acitvity或者Fragment的实例，而进行生命周期同步的？</p>
+<p>通过查看Gilde源码发现，当Gilde.with(Activity) 传入的是Activity的时候，这时通过Activity的FragmentManager来管理一个Fragment从而间接的同步Activity的生命周期。于是我们的onRequestPermissionsResult便可以模仿一下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> public static void requestPermissionsResult(Activity activity, String[] permission,</span><br><span class="line">                                                PermissionsFragment.OnPermissionListener callback)&#123;</span><br><span class="line">        PermissionsFragment permissionsFragment = getPermissionsFragment(activity);</span><br><span class="line">        permissionsFragment.setOnPermissionListener(callback);</span><br><span class="line">        permissionsFragment.requestPermissions(permission);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">private static PermissionsFragment getPermissionsFragment(Activity activity) &#123;</span><br><span class="line">    PermissionsFragment permissionsFragment = (PermissionsFragment) activity.getFragmentManager().findFragmentByTag(TAG);</span><br><span class="line">    boolean isNewInstance = permissionsFragment == null;</span><br><span class="line">    if (isNewInstance) &#123;</span><br><span class="line">        permissionsFragment = PermissionsFragment.newInstance();</span><br><span class="line">        FragmentManager fragmentManager = activity.getFragmentManager();</span><br><span class="line">        fragmentManager</span><br><span class="line">                .beginTransaction()</span><br><span class="line">                .add(permissionsFragment, TAG)</span><br><span class="line">                .commitAllowingStateLoss();</span><br><span class="line">        fragmentManager.executePendingTransactions();</span><br><span class="line">    &#125;</span><br><span class="line">    return permissionsFragment;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line">public class PermissionsFragment extends Fragment &#123;</span><br><span class="line">    private static final int PERMISSIONS_REQUEST_CODE = 42;</span><br><span class="line">    private OnPermissionListener mOnPermissionListener;</span><br><span class="line"></span><br><span class="line">    public static PermissionsFragment newInstance() &#123;</span><br><span class="line">        Bundle args = new Bundle();</span><br><span class="line">        PermissionsFragment fragment = new PermissionsFragment();</span><br><span class="line">        fragment.setArguments(args);</span><br><span class="line">        return fragment;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @TargetApi(Build.VERSION_CODES.M)</span><br><span class="line">    void requestPermissions(@NonNull String[] permissions) &#123;</span><br><span class="line">        if (checkPermissions(getActivity(), permissions)) &#123;</span><br><span class="line">            if (mOnPermissionListener != null) &#123;</span><br><span class="line">                mOnPermissionListener.onPermissionGranted();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            List&lt;String&gt; deniedPermissions = getDeniedPermissions(getActivity(), permissions);</span><br><span class="line">            if (deniedPermissions.size() &gt; 0) &#123;</span><br><span class="line">                requestPermissions(deniedPermissions.toArray(new String[deniedPermissions.size()]),</span><br><span class="line">                        PERMISSIONS_REQUEST_CODE);//请求权限</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) &#123;</span><br><span class="line">        super.onRequestPermissionsResult(requestCode, permissions, grantResults);</span><br><span class="line">        if (requestCode != PERMISSIONS_REQUEST_CODE) return;</span><br><span class="line">        if (verifyPermissions(grantResults)) &#123;</span><br><span class="line">            if (mOnPermissionListener != null)</span><br><span class="line">                mOnPermissionListener.onPermissionGranted();</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            if (mOnPermissionListener != null)</span><br><span class="line">                mOnPermissionListener.onPermissionDenied();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 验证权限是否都已经授权</span><br><span class="line">     */</span><br><span class="line">    private static boolean verifyPermissions(int[] grantResults) &#123;</span><br><span class="line">        for (int grantResult : grantResults) &#123;</span><br><span class="line">            if (grantResult != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获取权限列表中所有需要授权的权限</span><br><span class="line">     *</span><br><span class="line">     * @param context     上下文</span><br><span class="line">     * @param permissions 权限列表</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    private static List&lt;String&gt; getDeniedPermissions(Context context, String... permissions) &#123;</span><br><span class="line">        List&lt;String&gt; deniedPermissions = new ArrayList&lt;&gt;();</span><br><span class="line">        for (String permission : permissions) &#123;</span><br><span class="line">            if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) &#123;</span><br><span class="line">                deniedPermissions.add(permission);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return deniedPermissions;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 检查所有的权限是否已经被授权</span><br><span class="line">     *</span><br><span class="line">     * @param permissions 权限列表</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    private static boolean checkPermissions(Context context, String... permissions) &#123;</span><br><span class="line">        if (isOverMarshmallow()) &#123;</span><br><span class="line">            for (String permission : permissions) &#123;</span><br><span class="line">                if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) &#123;</span><br><span class="line">                    return false;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 判断当前手机API版本是否 &gt;= 6.0</span><br><span class="line">     */</span><br><span class="line">    private static boolean isOverMarshmallow() &#123;</span><br><span class="line">        return Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setOnPermissionListener(OnPermissionListener onPermissionListener) &#123;</span><br><span class="line">        this.mOnPermissionListener = onPermissionListener;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public interface OnPermissionListener &#123;</span><br><span class="line">        void onPermissionGranted();</span><br><span class="line"></span><br><span class="line">        void onPermissionDenied();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>最后，我们再来看看， 外部在使用权限时如何调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">public class MainActivity extends AppCompatActivity &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</span><br><span class="line">        super.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        findViewById(R.id.tv_hello).setOnClickListener(new View.OnClickListener() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void onClick(View v) &#123;</span><br><span class="line">                testRequest();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        findViewById(R.id.btn_group).setOnClickListener(new View.OnClickListener() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void onClick(View v) &#123;</span><br><span class="line">                testGroupPermission();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Permission(Manifest.permission.CAMERA)</span><br><span class="line">    private void testRequest() &#123;</span><br><span class="line">        Log.d(&quot;MainActivity&quot;, &quot;获得了相机权限&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Permission(&#123;Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CALL_PHONE&#125;)</span><br><span class="line">    private void testGroupPermission() &#123;</span><br><span class="line">        Log.d(&quot;MainActivity&quot;, &quot;获得了组合权限&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>怎么样，是不是很方便，仅需要一个注解，就完成了权限的请求。</p>
+<p><a href="https://github.com/qq605088820/Permission" target="_blank" rel="noopener">源码地址</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/16/hello-world/" data-id="cjojfwlut0000v80rhqu7rwn3" class="article-share-link">Share</a>
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/" data-id="cjojgep390003y90rt93s2a7a" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-初探RxJava2" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/xingguo.io/2018/11/05/初探RxJava2/" class="article-date">
+  <time datetime="2018-11-05T05:42:52.447Z" itemprop="datePublished">2018-11-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>​    RxJava原理基于最经典的观察者模式，观察者模式也叫做发布订阅模式。其定义如下：定义对象间一种一对多的依赖关系，使得每当一个对象改变状态，则所有依赖于它的对象都会得到通知并被自动更新。</p>
+<h3 id="扩展的观察者模式"><a href="#扩展的观察者模式" class="headerlink" title="扩展的观察者模式"></a>扩展的观察者模式</h3><p>在使用RxJava时，必须知道几个角色 <strong>被观察者（Observable）</strong>，<strong>订阅（subscribe）</strong>，<strong>观察者（Observer）</strong>，<strong>事件</strong>。</p>
+<p>简单来说就是，观察者订阅被观察者发出的事件。</p>
+<p>借(dao)用一张动图可表示为：</p>
+<p><img src="初探RxJava2\52eb2279jw1f2rx4ay0hrg20ig08wk4q.gif" alt=""></p>
+<p>使用代码可表示为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Observable.create(new ObservableOnSubscribe&lt;String&gt;() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void subscribe(ObservableEmitter&lt;String&gt; emitter) throws Exception &#123;</span><br><span class="line">        emitter.onNext(&quot;Hello&quot;);</span><br><span class="line">        emitter.onNext(&quot;Hi&quot;);</span><br><span class="line">        emitter.onNext(&quot;Aloha&quot;);</span><br><span class="line">        emitter.onComplete();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line">        .subscribe(new Observer&lt;String&gt;() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void onSubscribe(Disposable d) &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public void onNext(String s) &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public void onError(Throwable e) &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public void onComplete() &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="Observable提供的静态方法都做了什么？"><a href="#Observable提供的静态方法都做了什么？" class="headerlink" title="Observable提供的静态方法都做了什么？"></a>Observable提供的静态方法都做了什么？</h4><p>我们简单的看一下Observable的静态方法。</p>
+<p>我们先看看create方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public static &lt;T&gt; Observable&lt;T&gt; create(ObservableOnSubscribe&lt;T&gt; source) &#123;</span><br><span class="line">    ObjectHelper.requireNonNull(source, &quot;source is null&quot;);</span><br><span class="line">    return RxJavaPlugins.onAssembly(new ObservableCreate&lt;T&gt;(source));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们暂时不需要纠结 RxJavaPlugins.onAssembly() 这个方法。重点在于ObservableCreate方法。ObservableCreate继承自Observable也就是所有操作的基类。在2.x的Rxjava中Observable 已经有1.5w行代码，但是却只有一个抽象方法。（注意这个方法非常重要）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public abstract class Observable&lt;T&gt; implements ObservableSource&lt;T&gt;&#123;</span><br><span class="line">  //implemented methods</span><br><span class="line">  protected abstract void subscribeActual(Observer&lt;? super T&gt; observer);</span><br><span class="line">  //other implements/operators</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>显然Observable 中代码非常多，我们可以从subscribe（订阅）方法切入。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public final void subscribe(Observer&lt;? super T&gt; observer) &#123;</span><br><span class="line"> 	..</span><br><span class="line">    subscribeActual(observer);</span><br><span class="line">    ..</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>subscribe方法中代码也非常简单，前面是做了一些判空操作，和一些异常处理操作。最重要的是调用了唯一抽象方法subscribeActual（这个方法是继承Observable的类实现的），并且将你传入的observer（也就是你自己实现的Observer接口）传给了它。</p>
+<p>​    ok，我们回头再看看ObservableCreate类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public final class ObservableCreate&lt;T&gt; extends Observable&lt;T&gt; &#123;</span><br><span class="line">    final ObservableOnSubscribe&lt;T&gt; source;</span><br><span class="line"></span><br><span class="line">    public ObservableCreate(ObservableOnSubscribe&lt;T&gt; source) &#123;</span><br><span class="line">        this.source = source;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void subscribeActual(Observer&lt;? super T&gt; observer) &#123;</span><br><span class="line">        CreateEmitter&lt;T&gt; parent = new CreateEmitter&lt;T&gt;(observer);</span><br><span class="line">        observer.onSubscribe(parent);</span><br><span class="line">        try &#123;</span><br><span class="line">            source.subscribe(parent);</span><br><span class="line">        &#125; catch (Throwable ex) &#123;</span><br><span class="line">            Exceptions.throwIfFatal(ex);</span><br><span class="line">            parent.onError(ex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里，我们便看到了几个熟悉的身影。首先这里构造函数传入的ObservableOnSubscribe<t> source对象，就是文章第一段代码中所创建的。</t></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Observable.create(new ObservableOnSubscribe&lt;String&gt;() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void subscribe(ObservableEmitter&lt;String&gt; emitter) throws Exception &#123;</span><br><span class="line">        emitter.onNext(&quot;Hello&quot;);</span><br><span class="line">        emitter.onNext(&quot;Hi&quot;);</span><br><span class="line">        emitter.onNext(&quot;Aloha&quot;);</span><br><span class="line">        emitter.onComplete();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>其次，实现的抽象方法中subscribeActual(Observer&lt;? super T&gt; observer) observer对象也是文章开头代码中所创建的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">new Observer&lt;String&gt;() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void onSubscribe(Disposable d) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onNext(String s) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onError(Throwable e) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onComplete() &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这两个对象，分别是观察者和被观察者，通过subscribe（订阅），将它们俩个关联了起来。这里的subscribeActual方法至关重要，它几乎将整个RxJava 联系了起来，可以说是灵魂级方法了。</p>
+<p>我们继续看subscribeActual中的实现，首先它将我们传入的Observer对象进行了包装。然后将包装好的对象传给了subscribe方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CreateEmitter&lt;T&gt; parent = new CreateEmitter&lt;T&gt;(observer);</span><br><span class="line">observer.onSubscribe(parent);</span><br><span class="line">try &#123;</span><br><span class="line">	source.subscribe(parent);</span><br><span class="line">&#125; catch (Throwable ex) &#123;</span><br><span class="line">	Exceptions.throwIfFatal(ex);</span><br><span class="line">	parent.onError(ex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 这里的subscribe方法也是文章前面代码里的实现</p>
+<p><img src="初探RxJava2\1535532630155.png" alt="53553263015"></p>
+<p>也就是说，当你调用emitter.onNext() ,emitter.onComplete()时，你实际调用的是包装过的对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">static final class CreateEmitter&lt;T&gt;</span><br><span class="line">    extends AtomicReference&lt;Disposable&gt;</span><br><span class="line">    implements ObservableEmitter&lt;T&gt;, Disposable &#123;</span><br><span class="line">        private static final long serialVersionUID = -3434801548987643227L;</span><br><span class="line"></span><br><span class="line">        final Observer&lt;? super T&gt; observer;</span><br><span class="line"></span><br><span class="line">        CreateEmitter(Observer&lt;? super T&gt; observer) &#123;</span><br><span class="line">            this.observer = observer;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void onNext(T t) &#123;</span><br><span class="line">            if (t == null) &#123;//判断发射的值是否为空，为空就会直接回调error,并停止发射数据</span><br><span class="line">                onError(new NullPointerException(&quot;onNext called with null. Null values are generally not allowed in 2.x operators and sources.&quot;));</span><br><span class="line">                return;</span><br><span class="line">            &#125;</span><br><span class="line">            if (!isDisposed()) &#123;</span><br><span class="line">                observer.onNext(t);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void onError(Throwable t) &#123;</span><br><span class="line">            if (!tryOnError(t)) &#123;//如果发生错误，并且发现已经取消了订阅，便会继续上报</span><br><span class="line">                RxJavaPlugins.onError(t);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public boolean tryOnError(Throwable t) &#123;</span><br><span class="line">            if (t == null) &#123;</span><br><span class="line">                t = new NullPointerException(&quot;onError called with null. Null values are generally not allowed in 2.x operators and sources.&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">            if (!isDisposed()) &#123;//如果没有取消订阅，便会回调error方法，然后取消订阅</span><br><span class="line">                try &#123;</span><br><span class="line">                    observer.onError(t);</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    dispose();</span><br><span class="line">                &#125;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void onComplete() &#123;</span><br><span class="line">            if (!isDisposed()) &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    observer.onComplete();</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    dispose();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>这里发现，如果已经取消了订阅，那么这个异常没有任何处理，会继续上报RxJavaPlugins。</p>
+<p>继续查看RxJavaPlugins.onError源码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public static void onError(@NonNull Throwable error) &#123;</span><br><span class="line">    Consumer&lt;? super Throwable&gt; f = errorHandler;</span><br><span class="line"></span><br><span class="line">//处理当前error的类型</span><br><span class="line">    if (error == null) &#123;</span><br><span class="line">        error = new NullPointerException(&quot;onError called with null. Null values are generally not allowed in 2.x operators and sources.&quot;);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (!isBug(error)) &#123;</span><br><span class="line">            error = new UndeliverableException(error);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (f != null) &#123;//当前errorHandler对象如果不为空，会将当前错误类型传给errorHandler并安全退出</span><br><span class="line">        try &#123;</span><br><span class="line">            f.accept(error);</span><br><span class="line">            return;</span><br><span class="line">        &#125; catch (Throwable e) &#123;</span><br><span class="line">            // Exceptions.throwIfFatal(e); TODO decide</span><br><span class="line">            e.printStackTrace(); // NOPMD</span><br><span class="line">            uncaught(e);//杀死当前线程</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	</span><br><span class="line">	//如果当前没有任何处理，便会主动杀死当前发生错误的线程</span><br><span class="line">    error.printStackTrace(); // NOPMD</span><br><span class="line">    uncaught(error);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">  static void uncaught(@NonNull Throwable error) &#123;</span><br><span class="line">        Thread currentThread = Thread.currentThread();</span><br><span class="line">        UncaughtExceptionHandler handler = currentThread.getUncaughtExceptionHandler();</span><br><span class="line">        handler.uncaughtException(currentThread, error);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>通过追踪源码发现，error继续上报给了RxJavaPlugins，并且当前如果有对这个错误进行处理的操作便不会发生错误，如果当前错误没有得到任何处理，便会杀死发生错误的线程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">errorHandler设置方式</span><br><span class="line">RxJavaPlugins.setErrorHandler(new Consumer&lt;Throwable&gt;() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void accept(Throwable throwable) throws Exception &#123;</span><br><span class="line">                </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>也就是说，我们无论如何，在使用RxJava2.x的时候，都应该设置一个最后的兜底操作。避免程序在特殊情况下发生崩溃！</p>
+<p>通过分析源码可以验证以前我所知道的一些知识点：**</p>
+<p><strong>1，subscribeActual方法（也可以认为是subscribe方法）是Observable和Observer沟通的桥梁。</strong></p>
+<p><strong>2，RxJava2.x onNext方法将不再允许发射null值。</strong></p>
+<p><strong>3，使用RxJava2.x时，务必设置一个最后的错误兜底操作。</strong></p>
+<p><strong>4，拥有1.5w行代码的抽象类Observable，居然仅仅只有一个抽象方法。。。</strong></p>
+<p>​    当然，这仅仅是对最简单也最经典的create方法进行分析。RxJava中的源码实在是太优秀了，我等屌丝程序员只能顶礼膜拜，在分析中也能学到其很多的设计模式。RxJava是一个可观察的事件序列的异步操作库，具体可分为分三块 可观察、事件序列、异步。</p>
+<p>​    如果，你仅仅是把它当做线程切换库，或配合Retrofit的Rx Adapter就写道自己的项目中用了RxJava，并以此传道。那就太遗憾了。因为其真正的魅力在于丰富的操作符，可以组合成各种优秀的实现。当然，在你不了解或不使用Rx时，你一定会说，**这都是什么，到底有什么用？但是当你真正使用这个库你一定会说：wtf居然还能这么写。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/初探RxJava2/" data-id="cjojgep370002y90r02boios5" class="article-share-link">Share</a>
       
       
     </footer>
@@ -174,11 +381,19 @@
       <ul>
         
           <li>
-            <a href="/xingguo.io/2018/11/16/你好/">你好</a>
+            <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/">(no title)</a>
           </li>
         
           <li>
-            <a href="/xingguo.io/2018/11/16/hello-world/">Hello World</a>
+            <a href="/xingguo.io/2018/11/05/缓存/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/初探RxJava2/">(no title)</a>
           </li>
         
       </ul>

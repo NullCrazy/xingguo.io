@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="​    最近在某个库上开发了新功能，项目发版时不需要这部分功能。于是将库回退到当前线上的版本。     ​        某天，大佬突然说：你这个库没改回去啊，还是有bug的版本，你看我点了这个就闪退。 ​        我：还有这种事？查看当前版本。  ​        本地依赖：  what?我本地明明就不是这个版本啊，查了几个moudel依赖也没有加这个1.0.13。可能是缓存问题，老规矩">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="​    最近在某个库上开发了新功能，项目发版时不需要这部分功能。于是将库回退到当前线上的版本。     ​        某天，大佬突然说：你这个库没改回去啊，还是有bug的版本，你看我点了这个就闪退。 ​        我：还有这种事？查看当前版本。  ​        本地依赖：  what?我本地明明就不是这个版本啊，查了几个moudel依赖也没有加这个1.0.13。可能是缓存问题，老规矩">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/0.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/1.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/2.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/3.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/4.JPG">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/5.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/6.JPG">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/7.png">
+<meta property="og:updated_time" content="2018-10-29T08:05:14.294Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+<meta name="twitter:description" content="​    最近在某个库上开发了新功能，项目发版时不需要这部分功能。于是将库回退到当前线上的版本。     ​        某天，大佬突然说：你这个库没改回去啊，还是有bug的版本，你看我点了这个就闪退。 ​        我：还有这种事？查看当前版本。  ​        本地依赖：  what?我本地明明就不是这个版本啊，查了几个moudel依赖也没有加这个1.0.13。可能是缓存问题，老规矩">
+<meta name="twitter:image" content="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/记录一些gradle的使用/0.png">
+  
+    <link rel="alternate" href="/xingguo.io/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/xingguo.io/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/xingguo.io/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/xingguo.io/">Home</a>
+        
+          <a class="main-nav-link" href="/xingguo.io/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/xingguo.io/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qq605088820.github.io/xingguo.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-记录一些gradle的使用" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/" class="article-date">
+  <time datetime="2018-11-05T05:42:52.495Z" itemprop="datePublished">2018-11-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>​    最近在某个库上开发了新功能，项目发版时不需要这部分功能。于是将库回退到当前线上的版本。    </p>
+<p>​        某天，大佬突然说：你这个库没改回去啊，还是有bug的版本，你看我点了这个就闪退。</p>
+<p>​        我：还有这种事？查看当前版本。</p>
+<p><img src="记录一些gradle的使用\0.png" alt="1"></p>
+<p>​        本地依赖：</p>
+<p><img src="记录一些gradle的使用\1.png" alt="1"></p>
+<p>what?我本地明明就不是这个版本啊，查了几个moudel依赖也没有加这个1.0.13。可能是缓存问题，老规矩清理缓存吧。    </p>
+<p>​                <img src="记录一些gradle的使用\2.png" alt="2">    </p>
+<p>​    于是，在Terminal输入：<code>gradlew clean</code>。N分钟后清理完毕重新构建…</p>
+<p>​    本地还是1.0.13，这就很头疼了，明明没有这个版本啊，哪里来的？？</p>
+<p>​    我：大佬，要不我们清一下android studio的整个缓存吧。</p>
+<p>​    大佬：恩，开始吧。</p>
+<p>​    <img src="记录一些gradle的使用\3.png" alt="3"></p>
+<p>​    N分钟过去后，本地依然还是1.0.13….</p>
+<p>​    <img src="记录一些gradle的使用\4.JPG" alt="4"></p>
+<p>​    我：大佬，要不我们删除.gradle文件，重新来一次。</p>
+<p>​    大佬：gun…</p>
+<p>​    ok，我又想了一下，要不把版本号升高一点点，看这个版本变不变？</p>
+<p>​    说干就干，我和大佬把这个库升级到了1.0.17。</p>
+<p>​    N分钟之后，这个库的版本总算变了，变成了1.0.17。综上所述，我们可以发现并不是android studio的bug也不是缓存引起的问题。好，开个玩笑。经过上述步骤，我猜可能是别的库引用了这个1.0.13版本，导致当我引用这个1.0.6版本时，studio默认帮我做了升级操作。</p>
+<p>​    这时突然又想起了某大佬教我的另一个gradle命令。</p>
+<p>于是我在Terminal输入：<code>gradlew app:dep</code></p>
+<p><img src="记录一些gradle的使用\5.png" alt="5"></p>
+<p>​        这个命令能打印出项目的依赖树，能看到所有的依赖，我们找到utils这个库，不出所料，确实是有别的库引用了高版本的utils，导致了utils库升级到了1.0.13。</p>
+<p>​        <img src="记录一些gradle的使用\6.JPG" alt="6"></p>
+<p>问题找到了，那么应该怎么解决呢？摆在眼前的路有两条。</p>
+<ol>
+<li>修改依赖1.0.13的库到1.0.6保持和线上的版本一致，然后重新上传到maven，然后本地再更新一次，这个方法有点麻烦，但是也是最直接的解决方案。</li>
+<li>utils库修复闪退的bug，然后重传到maven，本地更新依赖。这个办法风险很大，因为utils这个库已经加了很多代码了，还要重新拉分支，屏蔽新加的这部分代码。</li>
+</ol>
+<p>思考良久，问了一下另一个大佬这个问题怎么解决比较好，大佬思索了一下，给出了解决方案。</p>
+<p>在app.gradle中加入了以下脚本。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">configurations.all &#123;</span><br><span class="line">    resolutionStrategy.eachDependency &#123; DependencyResolveDetails details -&gt;</span><br><span class="line">        def requested = details.requested</span><br><span class="line">        if (requested.group == &quot;com.lucky&quot; &amp;&amp; requested.name == &quot;utils&quot;) &#123;</span><br><span class="line">            details.useVersion &apos;1.0.6-SNAPSHOT&apos;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段脚本意思是，强制utils库的版本使用1.0.6-SNAPSHOT。</p>
+<p>重新build后。我们再次查看项目依赖树</p>
+<p><img src="记录一些gradle的使用\7.png" alt="7"></p>
+<p>utils库已经被强制回到了1.0.6-SNAPSHOT。</p>
+<p>不得不说这段脚本确实是最佳的解决方案，但是这个方法的缺点就是，想要升级utils库时，一定要记得删除这段脚本，不然会导致本地一直都是1.0.6-SNAPSHOT。。。</p>
+<h1 id="Gradle命令："><a href="#Gradle命令：" class="headerlink" title="Gradle命令："></a>Gradle命令：</h1><p>ok，那么上文中所说的gradlew到底是什么呢？gradlew 即gradle wrapper，意思是gradle的一层包装。可以理解成对gradle的封装。你可以在你的项目中找到它，在根目录下有个/gradle/wrapper文件夹，里面有wrapper的jar包和版本号等信息。</p>
+<p><strong>常用的gradle命令</strong></p>
+<ul>
+<li><p>gradlew -v 可以查看当前gradle的版本号</p>
+</li>
+<li><p>gradlew clean 删除app目录下所有bulid文件夹</p>
+</li>
+<li><p>gradlew build 打包apk，你可以在app/build/outputs/apk下找到输出的包</p>
+</li>
+<li><p>gradlew tasks 列出所有的task</p>
+</li>
+<li><p>build 命令会打出所有buildTypes包，如果你想打包某个buildTypes。你可以使用assemble+buildTypes形式。</p>
+<p>比如：gradlew assembleDebug   gradlew assembleRelease等。</p>
+<p>此命令更厉害的地方在于还能打渠道包，我们以wandoujia渠道为例。你可以使用assemble+Product Flavor+buildTypes</p>
+<p>比如：gradlew assembleWandoujiaRelease。直接就能输出豌豆荚渠道下的realease包。</p>
+</li>
+<li><p>graldew installRelease 打包并安装release包</p>
+</li>
+<li><p>gradlew uninstallRelease 卸载Release包</p>
+</li>
+<li><p>gradlew app:dep  查看项目依赖树</p>
+</li>
+</ul>
+<h2 id="排除传递依赖"><a href="#排除传递依赖" class="headerlink" title="排除传递依赖"></a>排除传递依赖</h2><ul>
+<li><p>exclude：排除指定模块的依赖。参数分别是<code>group</code>和<code>module</code>，会排除所有匹配项</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">androidTestCompile(&apos;com.android.support.test.espresso:espresso-core:2.2.2&apos;, &#123;</span><br><span class="line">	//排除兼容包下annotations模块</span><br><span class="line">    exclude group: &apos;com.android.support&apos;, module: &apos;support-annotations&apos;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>transitive：默认为true，gradle自动添加子依赖项。设置为false排除所有的传递依赖，可以用来解决一些依赖冲突的问题。</p>
+</li>
+<li><p>force：强制设置某个模块的版本。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//解决上面版本冲突问题，此方法也可行。</span><br><span class="line">configurations.all&#123;</span><br><span class="line">    resolutionStrategy&#123;</span><br><span class="line">        force&apos;com.xxx:xxx:1.0.6-SNAPSHOT&apos;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>构建类型</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">buildTypes &#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>   比如，你有多个环境，debug环境，预生产环境，生产环境。这时候你有多个URL服务器地址，一般你在打包时，需要在代码里改几行代码，以实现访问不同的环境。用脚本你可以这样实现。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">buildTypes &#123;</span><br><span class="line">    debug &#123;</span><br><span class="line">        ...</span><br><span class="line">        buildConfigField &quot;String&quot;, &quot;BASE_URL&quot;, &quot;测试地址&quot;</span><br><span class="line">    &#125;</span><br><span class="line">    pre &#123;</span><br><span class="line">    	...</span><br><span class="line">        buildConfigField &quot;String&quot;, &quot;BASE_URL&quot;, &quot;预生产地址&quot;</span><br><span class="line">    &#125;</span><br><span class="line">    release &#123;</span><br><span class="line">       ...</span><br><span class="line">       buildConfigField &quot;String&quot;,&quot;BASE_URL&quot;, &quot;生产地址&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>引用时，你可以在项目中使用BuildConfig.BASE_URL 不同环境传递的参数也是不一样的。</p>
+<p><strong>多渠道打包</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">productFlavors&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>网上多是类似友盟的配置，copy过来</p>
+<p>在<code>AndroidManifest.xml</code>里面写上：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta-data </span><br><span class="line">android:name=&quot;UMENG_CHANNEL&quot;</span><br><span class="line"></span><br><span class="line">android:value=&quot;Channel_ID&quot; /&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">productFlavors &#123;</span><br><span class="line">    xiaomi &#123;</span><br><span class="line">        manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;xiaomi&quot;]</span><br><span class="line">    &#125;</span><br><span class="line">    wandoujia &#123;</span><br><span class="line">        manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;wandoujia&quot;]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qq605088820.github.io/xingguo.io/2018/11/05/记录一些gradle的使用/" data-id="cjojgep2s0000y90rint60het" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/xingguo.io/2018/11/05/缓存/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/xingguo.io/archives/2018/11/">November 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/记录一些gradle的使用/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/缓存/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/实现权限请求？一个注解就够了/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/xingguo.io/2018/11/05/初探RxJava2/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/xingguo.io/" class="mobile-nav-link">Home</a>
+  
+    <a href="/xingguo.io/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/xingguo.io/fancybox/jquery.fancybox.css">
+  <script src="/xingguo.io/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/xingguo.io/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
