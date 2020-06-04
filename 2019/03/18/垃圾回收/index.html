@@ -79,13 +79,32 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="coding">
-<meta property="og:url" content="https://qq605088820.github.io/xingguo.io/index.html">
+<meta name="description" content="上一天我们详细讲述了 JVM 的内存区域，知道了 GC 主要发生在堆，那么 GC 该怎么判断堆中的对象实例或数据是不是垃圾呢，或者说判断某些数据是否是垃圾的方法有哪些。 引用计数法最容易想到的一种方式是引用计数法，啥叫引用计数法，简单地说，就是对象被引用一次，在它的对象头上加一次引用次数，如果没有被引用（引用次数为 0），则此对象可回收 1String ref = new String(&amp;quot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="垃圾回收">
+<meta property="og:url" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/index.html">
 <meta property="og:site_name" content="coding">
+<meta property="og:description" content="上一天我们详细讲述了 JVM 的内存区域，知道了 GC 主要发生在堆，那么 GC 该怎么判断堆中的对象实例或数据是不是垃圾呢，或者说判断某些数据是否是垃圾的方法有哪些。 引用计数法最容易想到的一种方式是引用计数法，啥叫引用计数法，简单地说，就是对象被引用一次，在它的对象头上加一次引用次数，如果没有被引用（引用次数为 0），则此对象可回收 1String ref = new String(&amp;quot">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/ref.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/kedaxing.png">
+<meta property="og:image" content="http://wiki.luckincoffee.com/download/thumbnails/38325929/WX20200426-104727@2x.png?version=1&modificationDate=1587869266000&api=v2">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/biaoji.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/fuzhi.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/biaojizhengli.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/WeChat75015630b53745c4bb872649e66be77b.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/WeChat619fa77707af5042e5fe0385440614b2.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/WeChat697b572ff590bf011152f0dde62bf9aa.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/WeChatfd13ffd6a659b65a5b692d50d8b1a19c.png">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/650.gif">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/641.gif">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/652.gif">
+<meta property="og:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/WeChat96abc51d78cb96740754e0f42d14a108.png">
+<meta property="og:updated_time" content="2020-06-04T08:19:33.761Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="coding">
+<meta name="twitter:title" content="垃圾回收">
+<meta name="twitter:description" content="上一天我们详细讲述了 JVM 的内存区域，知道了 GC 主要发生在堆，那么 GC 该怎么判断堆中的对象实例或数据是不是垃圾呢，或者说判断某些数据是否是垃圾的方法有哪些。 引用计数法最容易想到的一种方式是引用计数法，啥叫引用计数法，简单地说，就是对象被引用一次，在它的对象头上加一次引用次数，如果没有被引用（引用次数为 0），则此对象可回收 1String ref = new String(&amp;quot">
+<meta name="twitter:image" content="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/ref.png">
 
 
 
@@ -115,13 +134,13 @@
 
 
 
-  <link rel="canonical" href="https://qq605088820.github.io/xingguo.io/">
+  <link rel="canonical" href="https://qq605088820.github.io/xingguo.io/2019/03/18/垃圾回收/">
 
 
 
 
 
-  <title>coding</title>
+  <title>垃圾回收 | coding</title>
   
 
 
@@ -140,8 +159,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -214,9 +232,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -246,9 +264,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/xingguo.io/2019/03/18/垃圾回收/" itemprop="url">垃圾回收</a></h1>
+          <h1 class="post-title" itemprop="name headline">垃圾回收</h1>
         
 
         <div class="post-meta">
@@ -298,9 +314,7 @@
       
 
       
-        
-          
-            <p>上一天我们详细讲述了 JVM 的内存区域，知道了 GC 主要发生在堆，那么 GC 该怎么判断堆中的对象实例或数据是不是垃圾呢，或者说判断某些数据是否是垃圾的方法有哪些。</p>
+        <p>上一天我们详细讲述了 JVM 的内存区域，知道了 GC 主要发生在堆，那么 GC 该怎么判断堆中的对象实例或数据是不是垃圾呢，或者说判断某些数据是否是垃圾的方法有哪些。</p>
 <h3 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h3><p>最容易想到的一种方式是引用计数法，啥叫引用计数法，简单地说，就是对象被引用一次，在它的对象头上加一次引用次数，如果没有被引用（引用次数为 0），则此对象可回收</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String ref = new String(&quot;Java&quot;);</span><br></pre></td></tr></table></figure>
 <p>以上代码 ref1 引用了右侧定义的对象，所以引用次数是 1</p>
@@ -392,8 +406,6 @@
 <li>抛出异常的位置 另外需要注意的是由于新生代的特点（大部分对象经过 Minor GC后会消亡）， Minor GC 用的是复制算法，而在老生代由于对象比较多，占用的空间较大，使用复制算法会有较大开销（复制算法在对象存活率较高时要进行多次复制操作，同时浪费一半空间）所以根据老生代特点，在老年代进行的 GC 一般采用的是标记整理法来进行回收。</li>
 </ul>
 
-          
-        
       
     </div>
     
@@ -410,141 +422,28 @@
       
 
       
-
-      
-
       
       
-        <div class="post-eof"></div>
+
       
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://qq605088820.github.io/xingguo.io/xingguo.io/2019/03/14/JVM内存区域/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xingguolei">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/xingguo.io/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="coding">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/xingguo.io/2019/03/14/JVM内存区域/" itemprop="url">JVM内存区域</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-03-14T16:04:58+08:00">
-                2019-03-14
-              </time>
+              <a href="/xingguo.io/2019/03/14/JVM内存区域/" rel="next" title="JVM内存区域">
+                <i class="fa fa-chevron-left"></i> JVM内存区域
+              </a>
             
+          </div>
 
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <p>​    要搞懂垃圾回收的机制，我们首先要知道垃圾回收主要回收的是哪些数据，这些数据主要在哪一块区域，所以我们一起来看下 JVM 的内存区域。</p>
-<p><img src="/xingguo.io/2019/03/14/JVM内存区域/jvm内存区域.png" alt=""></p>
-<p><strong>虚拟机栈：</strong>描述的是方法执行时的内存模型,是线程私有的，生命周期与线程相同,每个方法被执行的同时会创建<strong>栈桢</strong>（下文会看到），主要保存执行方法时的局部变量表、操作数栈、动态连接和方法返回地址等信息,方法执行时入栈，方法执行完出栈，出栈就相当于清空了数据，入栈出栈的时机很明确，所以这块区域<strong>不需要进行 GC</strong>。</p>
-<p><strong>本地方法栈：</strong>与虚拟机栈功能非常类似，主要区别在于虚拟机栈为虚拟机执行 Java 方法时服务，而本地方法栈为虚拟机执行本地方法时服务的。这块区域也<strong>不需要进行 GC</strong></p>
-<p><strong>程序计数器：</strong>线程独有的， 可以把它看作是当前线程执行的字节码的行号指示器，比如如下字节码内容，在每个字节码`前面都有一个数字（行号），我们可以认为它就是程序计数器存储的内容</p>
-<p>通过javap -verbose xx.class命令，我们可以看到</p>
-<p><img src="/xingguo.io/2019/03/14/JVM内存区域/程序计数器.png" alt="程序计数器"></p>
-<p>记录这些数字（指令地址）有啥用呢，我们知道 Java 虚拟机的多线程是通过线程轮流切换并分配处理器的时间来完成的，在任何一个时刻，一个处理器只会执行一个线程，如果这个线程被分配的时间片执行完了（线程被挂起），处理器会切换到另外一个线程执行，当下次轮到执行被挂起的线程（唤醒线程）时，怎么知道上次执行到哪了呢，通过记录在程序计数器中的行号指示器即可知道，所以程序计数器的主要作用是记录线程运行时的状态，方便线程被唤醒时能从上一次被挂起时的状态继续执行，需要注意的是，程序计数器是<strong>唯一一个</strong>在 Java 虚拟机规范中没有规定任何 OOM 情况的区域，所以这块区域也<strong>不需要进行 GC</strong></p>
-<p><strong>本地内存：</strong>线程共享区域，Java 8 中，本地内存，也是我们通常说的<strong>堆外内存</strong>，包含元空间和直接内存,注意到上图中 Java 8 和 Java 8 之前的 JVM 内存区域的区别了吗，在 Java 8 之前有个<strong>永久代</strong>的概念，实际上指的是 HotSpot 虚拟机上的永久代，它用永久代实现了 JVM 规范定义的方法区功能，主要存储类的信息，常量，静态变量，即时编译器编译后代码等，这部分由于是在堆中实现的，受 GC 的管理，不过由于永久代有 -XX:MaxPermSize 的上限，所以如果动态生成类（将类信息放入永久代）或大量地执行 <strong>String.intern</strong> （将字段串放入永久代中的常量区），很容易造成 OOM，有人说可以把永久代设置得足够大，但很难确定一个合适的大小，受类数量，常量数量的多少影响很大。所以在 Java 8 中就把方法区的实现移到了本地内存中的元空间中，这样方法区就不受 JVM 的控制了,也就不会进行 GC，也因此提升了性能（发生 GC 会发生 Stop The Word,造成性能受到一定影响，后文会提到），也就不存在由于永久代限制大小而导致的 OOM 异常了（假设总内存1G，JVM 被分配内存 100M， 理论上元空间可以分配 2G-100M = 1.9G，空间大小足够），也方便在元空间中统一管理。综上所述，在 Java 8 以后这一区域也<strong>不需要进行 GC</strong></p>
-<p><strong>堆：</strong>前面几块数据区域都不进行 GC，那只剩下堆了，是的，这里是 GC 发生的区域！对象实例和数组都是在堆上分配的，GC 也主要对这两类数据进行回收，这块也是我们之后重点需要分析的区域</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -554,10 +453,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -565,6 +465,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -585,8 +489,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -628,6 +541,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引用计数法"><span class="nav-number">1.</span> <span class="nav-text">引用计数法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可达性算法"><span class="nav-number">2.</span> <span class="nav-text">可达性算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#虚拟机栈中引用的对象"><span class="nav-number">2.1.</span> <span class="nav-text">虚拟机栈中引用的对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法区中类静态属性引用的对象"><span class="nav-number">2.2.</span> <span class="nav-text">方法区中类静态属性引用的对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法区中常量引用的对象"><span class="nav-number">2.3.</span> <span class="nav-text">方法区中常量引用的对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#本地方法栈中-JNI-引用的对象"><span class="nav-number">2.4.</span> <span class="nav-text">本地方法栈中 JNI 引用的对象</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#垃圾回收算法"><span class="nav-number"></span> <span class="nav-text">垃圾回收算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#标记清除算法"><span class="nav-number">1.</span> <span class="nav-text">标记清除算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复制算法"><span class="nav-number">2.</span> <span class="nav-text">复制算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#标记整理法"><span class="nav-number">3.</span> <span class="nav-text">标记整理法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分代收集算法"><span class="nav-number">4.</span> <span class="nav-text">分代收集算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#分代收集工作原理"><span class="nav-number">4.1.</span> <span class="nav-text">分代收集工作原理</span></a></li></ol></li></ol></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -761,6 +690,10 @@
   
 
   
+  <script type="text/javascript" src="/xingguo.io/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/xingguo.io/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
